@@ -1,0 +1,27 @@
+{
+  "pluginmetadataversion": 2,
+  "name": "QResource Plugin",
+  "author": "Michael Pishchagin",
+  "type": [
+     "architecture"
+  ],
+  "api": [
+     "python3"
+  ],
+  "description": "Extract QResource contents",
+  "license": {
+     "name": "MIT"
+  },
+  "platforms": [
+     "Darwin",
+     "Windows",
+     "Linux"
+  ],
+  "installinstructions": {
+     "Darwin": "",
+     "Windows": "",
+     "Linux": ""
+  },
+  "version": "v1.0",
+  "minimumbinaryninjaversion": 3500
+}
