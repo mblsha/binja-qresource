@@ -3,7 +3,7 @@
   "name": "QResource Plugin",
   "author": "Michael Pishchagin",
   "type": [
-     "architecture"
+     "helper"
   ],
   "api": [
      "python3"
