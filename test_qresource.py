@@ -35,8 +35,9 @@ def test_parse_tree_raw():
 
 def test_get_files():
     res = QResource()
-    names_data = data[NAMES_START_OFFSET:]
-    payload_data = data[PAYLOAD_START_OFFSET:]
+    view = memoryview(data)
+    names_data = view[NAMES_START_OFFSET:]
+    payload_data = view[PAYLOAD_START_OFFSET:]
     files = res.get_files(data, names_data, payload_data)
     assert len(files) == 6
 
