@@ -1,5 +1,12 @@
-import binaryninja
+from binaryninja import (
+    BinaryView,
+    BackgroundTaskThread,
+    BinaryReader,
+    MediumLevelILOperation,
+    show_message_box,
+)
 
+import os
 import re
 import tempfile
 from typing import List, NamedTuple, Optional
@@ -41,7 +48,6 @@ def find_calls(bv):
                                 function_name = match.group(1)
                             else:
                                 function_name = hex(f.symbol.address)
-                            function_name = function_name.split("(")[0]
                             yield Call(
                                 bv,
                                 function_name,
@@ -52,18 +58,29 @@ def find_calls(bv):
                             )
 
 
-def extract(bv, res):
+class ExtractResult(NamedTuple):
+    tmp_dir: str
+    num_resources: int
+    num_files: int
+
+
+def extract(bv):
+    num_resources = 0
+    num_files = 0
+
     res = QResource()
     tmp_dir = tempfile.mkdtemp(prefix="qresource_")
     print(f"Extracting to: {tmp_dir}")
     calls = find_calls(bv)
     for c in calls:
+        num_resources += 1
         print(c)
         tree = bv[c.tree_ptr :]
         names = bv[c.names_ptr :]
         payload = bv[c.payload_ptr :]
         files = res.get_files(tree, names, payload)
         for f in files:
+            num_files += 1
             fname = f.name[2:]
             outname = os.path.join(tmp_dir, fname)
             dirname = os.path.dirname(outname)
@@ -75,6 +92,16 @@ def extract(bv, res):
                 outname, (f.last_modified.timestamp(), f.last_modified.timestamp())
             )
     print(f"Extracted to: {tmp_dir}")
+    return ExtractResult(tmp_dir, num_resources, num_files)
 
 
-extract(bv, qresource.QResource())
+class ExtractQResources(BackgroundTaskThread):
+    def __init__(self, bv):
+        BackgroundTaskThread.__init__(self, "", True)
+        self.progress = "QResource: working..."
+        self.bv = bv
+
+    def run(self):
+        res = extract(self.bv)
+        msg = f"Extracted {res.num_resources} resources ({res.num_files} files) to:\n{res.tmp_dir}"
+        show_message_box("QResource", msg)
